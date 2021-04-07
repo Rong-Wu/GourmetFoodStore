@@ -1,0 +1,67 @@
+/*style for bootstrap components*/
+#first-navbar {
+	background-image: url("../images/banner.jpg");
+
+  /*background-color: #ffffff;*/
+}
+
+.logo{
+	width:300px;
+}
+
+.sign-div{
+	margin-left:auto;
+	margin-top: auto;
+}
+
+
+#first-navbar .nav-link{
+	color:rgb(243, 122, 9);
+}
+
+#first-navbar .nav-link:hover{ 
+  color: #ffdf77;
+}
+
+/*#second-navbar {
+  background-color: #ffdf77;
+}*/
+
+#second-navbar .nav-link{
+	color:rgb(243, 122, 9);
+	text-align: center;
+  	margin-left: 30px;
+  	padding:10px; 
+  	font-size: 17px;
+}
+
+
+#second-navbar .nav-link:hover{
+	background-color: #ffdf77;
+	color: #ffffff;
+}
+
+#second-navbar .nav-link.active{
+	background-color: #ffdf77;
+	color: #ffffff;
+}
+
+#search-btn{
+	background-color: rgb(243, 122, 9);
+}
+
+
+
+.footer-2{
+	background-color: rgb(243, 122, 9);
+	text-align: center;
+	color:black;
+}
+
+.breadcrumb{
+	background-color: rgb(243, 122, 9);
+}
+
+.breadcrumb-item a{
+	color:black;
+}
