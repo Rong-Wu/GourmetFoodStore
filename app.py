@@ -1,0 +1,106 @@
+
+from flask import Flask, render_template, request, json, redirect
+from flaskext.mysql import MySQL
+from flask import session
+
+from flask import jsonify
+
+app = Flask(__name__)
+
+mysql = MySQL()
+
+# MySQL configurations
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'root'
+app.config['MYSQL_DATABASE_DB'] = 'GourmetFood'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.config['MYSQL_DATABASE_PORT'] = 8889
+mysql.init_app(app) 
+
+
+app.secret_key = 'secret key'
+
+@app.route("/") # define an url "/" home page
+def main():
+	return render_template('home.html')
+
+@app.route('/showSignUp') 
+def showSignUp():
+    return render_template('signup.html')
+
+@app.route('/signUp',methods=['POST']) 
+def signUp():
+    
+    _name = request.form['inputName']
+    _email = request.form['inputEmail']
+    _password = request.form['inputPassword']
+ 
+    # validate the received values
+    if _name and _email and _password:
+
+        conn = mysql.connect()
+        cursor = conn.cursor() 
+
+        cursor.execute("INSERT INTO tbl_user(name, email, password) VALUES (%s, %s, %s)", (_name, _email, _password))
+        data = cursor.fetchall() 
+        
+        if len(data) == 0:
+            conn.commit() 
+            return json.dumps({'message':'User created successfully !'}) 
+        else:
+            return json.dumps({'error':str(data[0])})
+
+    else:
+        return json.dumps({'error':'Enter the required fields!'})
+
+
+@app.route('/showSignin') 
+def showSignin():
+    return render_template('signin.html')
+
+
+@app.route('/validateLogin', methods=['POST'])
+def validateLogin():
+    try:
+        _email = request.form['inputEmail']
+        _password = request.form['inputPassword']
+
+        con = mysql.connect()
+        cursor = con.cursor()
+        
+
+        cursor.execute("SELECT * FROM tbl_user WHERE email = %s", (_email))
+
+        data = cursor.fetchall()
+
+
+        if len(data) > 0:
+            if str(data[0][3]) == _password:
+                session['user_id'] = data[0][0]
+                return redirect('/home') #login success
+            else:
+                return json.dumps({'error': 'Wrong Email address or Password.'})
+        else:
+            return json.dumps({'error': 'Wrong Email address or Password.'})
+
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+    finally:
+        cursor.close()
+        con.close()
+
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id',None) #destroy the session
+    return redirect('/')
+
+
+
+if __name__ == "__main__":
+    app.run(debug=True)  
+    # app.run()
+
+
+
+

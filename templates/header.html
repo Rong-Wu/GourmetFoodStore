@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <!-- meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, 
+    shrink-to-fit=no">
+    <title>Fresh Gourmet</title>
+    <link rel="stylesheet" 
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" 
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" 
+    crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../static/gfstyle.css" />
+
+    <script
+    src="https://code.jquery.com/jquery-3.3.1.js"
+    integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+    crossorigin="anonymous">
+    </script>
+
+</head>
+
+<body>
+<header>
+    <!-- top menu (logo, signup, login / profile, logout, cart) -->
+  <nav class="navbar navbar-expand-md" id="first-navbar">
+    <!-- <div class="header-1"> -->
+        <div class="container">
+
+            <!-- logo -->
+            <div class="logo-div">
+                <a href="#" ><img class="logo" src="/static/img/logo.png" alt="store logo"></a>
+            </div>
+            
+            <!-- sign in /sign up -->
+            <!-- toggler plugin works on the id and data-target matching -->
+            <div class="sign-div">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                  <ul class="navbar-nav ml-auto">
+
+                    {% if session.get('user_id') %}
+                    <li class="nav-item">
+                      <a class="nav-link" href="#">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" hhref="/logout">Logout</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="#">Cart</a>
+                    </li>
+                    {% else %}
+
+                    <li class="nav-item">
+                      <a class="nav-link" href="/showSignUp">SignUp</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="/showSignin">Login</a>
+                    </li>
+
+                    {% endif %}
+                  </ul>
+                </div>
+            </div>
+        </div>
+        <!-- container -->
+    <!-- </div> -->
+  </nav>
+
+
+  <nav class="navbar navbar-expand-md" id="second-navbar">
+    <div class="container"> 
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link active" href="/">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Category1</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Category1</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Category1</a>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Category1</a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                      <li><a class="dropdown-item" href="#">Continents</a></li>
+                      <li><a class="dropdown-item" href="#">Countries</a></li>
+                    </ul>
+                </li>
+            </ul> 
+  
+            <form class="form-inline my-2 my-lg-0">
+              <input class="form-control mr-sm-2" type="search" placeholder="Search.." aria-label="Search">
+              <button id="search-btn" class="btn my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+    <!-- end of container -->
+  </nav>
+</header>
