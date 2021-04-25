@@ -1,0 +1,29 @@
+
+{% include "header.html" %}
+
+
+
+<div class="container-fluid">
+    <div>  
+        <h4>Search Result</h4> 
+    </div>
+    <div class="row">
+        {% for product in result %}
+                <div class="col-sm-4 col-md-3">
+                    <div class="thumbnail">
+                        <a href="/productinfo?id={{ product[0] }}">
+                            <img style="width: 100%; height: 300px; display: block;" alt="100%x300" src="{{ product[5] }}">
+                        </a>
+                        <div class="caption center">
+                            <p></p>
+                            <p class="text-center text-danger"><a href="/productinfo?id={{ product[2] }}"> <span>{{ product[1] }}</span></a>
+                                <span>&nbsp&nbsp&nbsp${{ product[4] }}</span>
+                            </p>                   
+                            <p><a href="#" id="{{ product[0] }}"class="btn btn-warning btn-block" role="button">Add to Cart</a></p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+    </div>
+</div>
+{% include "footer.html" %}
