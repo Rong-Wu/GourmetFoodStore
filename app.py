@@ -22,7 +22,25 @@ app.secret_key = 'secret key'
 
 @app.route("/") # define an url "/" home page
 def main():
-	return render_template('home.html')
+    try:
+        if session.get('user_id'):
+            _userid =session.get('user_id')
+        
+        conn = mysql.connect()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM tbl_product")
+        data = cursor.fetchall()
+
+        if len(data)>= 0 :
+            conn.commit()
+            return render_template('home.html',products=data)
+        else:
+            return render_template ('error.html', error='no products')
+       
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+	
 
 @app.route('/showSignUp') 
 def showSignUp():
@@ -89,6 +107,30 @@ def validateLogin():
         cursor.close()
         con.close()
 
+@app.route("/search", methods=['POST', 'GET'])
+def search():
+    try:
+        if session.get('user_id'):
+            _userid =session.get('user_id')
+        
+        _keyword = request.form['search']
+            
+        
+        conn = mysql.connect()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM tbl_product where name like %s",(_keyword))
+                                                                                                               
+        data = cursor.fetchall()
+
+        if len(data)>= 0 :
+            conn.commit()
+            return render_template('SearchResult.html',result=data)
+        else:
+            return render_template ('error.html', error='no search result')
+       
+    except Exception as e:
+        return render_template('error.html',error = str(e))
 
 @app.route('/logout')
 def logout():
