@@ -1,9 +1,9 @@
 
-from flask import Flask, render_template, request, json, redirect
+from flask import Flask, render_template, request, json, redirect,url_for
 from flaskext.mysql import MySQL
 from flask import session
-
 from flask import jsonify
+import math
 
 app = Flask(__name__)
 
@@ -118,9 +118,9 @@ def search():
         
         conn = mysql.connect()
         cursor = conn.cursor()
-
-        cursor.execute("SELECT * FROM tbl_product where name like %s",('%'+_keyword+'%'))
-                                                                                                               
+        #SearchContent = "SELECT * FROM tbl_product where name like %{}% ".formet(_keyword)
+        #cursor.execute(SearchContent)
+        cursor.execute("SELECT * FROM tbl_product where name like %s ",('%'+_keyword+'%'))                                                                                                       
         data = cursor.fetchall()
 
         if len(data)>= 0 :
@@ -131,6 +131,58 @@ def search():
        
     except Exception as e:
         return render_template('error.html',error = str(e))
+
+
+@app.route("/Category", methods=['POST', 'GET'])
+def Category():
+    try:
+        if session.get('user_id'):
+            _userid =session.get('user_id')
+        
+        if request.method == 'GET':
+            cate_id=request.args.get('_id')
+        
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        #SearchContent = "SELECT * FROM tbl_product where name like %{}% ".formet(_keyword)
+        #cursor.execute(SearchContent)
+        cursor.execute("SELECT * FROM tbl_product where category_id= %s",(cate_id))                                                                                                    
+        data = cursor.fetchall()
+
+        if len(data)>= 0 :
+            conn.commit()
+            return render_template('SearchResult.html',result=data)
+        else:
+            return render_template ('error.html', error='no search result')
+       
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+
+@app.route("/productinfo", methods=['POST', 'GET'])
+def productinfo():
+    if session.get('user_id'):
+        _userid =session.get('user_id')
+    try:
+        if request.method == 'GET':
+            product_id=request.args.get('_id')
+            session['product_id']= product_id
+
+            conn = mysql.connect()
+            cursor = conn.cursor()
+        #SearchContent = "SELECT * FROM tbl_product where name like %{}% ".formet(_keyword)
+        #cursor.execute(SearchContent)
+            cursor.execute("SELECT * FROM tbl_product where id= %s ",(product_id))                                                                                                      
+            data = cursor.fetchall()
+
+        if len(data)>= 0 :
+            conn.commit()
+            return render_template('productinfo.html',result=data)
+        else:
+            return render_template ('error.html', error='no search result')
+       
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+
 
 @app.route('/logout')
 def logout():
