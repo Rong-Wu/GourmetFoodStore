@@ -119,7 +119,7 @@ def search():
         conn = mysql.connect()
         cursor = conn.cursor()
 
-        cursor.execute("SELECT * FROM tbl_product where name like %s",(_keyword))
+        cursor.execute("SELECT * FROM tbl_product where name like %s",('%'+_keyword+'%'))
                                                                                                                
         data = cursor.fetchall()
 
