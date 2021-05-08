@@ -1,0 +1,30 @@
+{% include "header.html" %}
+<div class="container">
+	{% if orders|count == 0 %}
+	<div>
+	    <h3>You do not have any orders yet!</h3>
+	</div>
+	{% else %}
+
+		<h3> MY ORDERS </h3>
+			<table class="table">
+			  <tbody>
+			  	<tr>
+			      <td>Order Date</td>
+			      <td>Order Number</td>
+			      <td>Total Price</td>
+			      <td>View Detail</td>
+			    </tr>
+			  	{% for order in orders %}
+			    <tr>
+			      <td>{{order.purchase_date}}</td>
+			      <td>{{order.order_id}}</td>
+			      <td>{{order.total_price}}</td>
+			      <td><button type="button" class="btn yellow-button" onclick="/viewOrderDetail/{{order.order_id}}">View Detail</button></td>
+			    </tr>
+			    {% endfor %}
+			  </tbody>
+			</table> 
+	{% endif %}
+</div>
+{% include "footer.html" %}

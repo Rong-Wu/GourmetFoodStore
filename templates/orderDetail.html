@@ -1,0 +1,37 @@
+{% include "header.html" %}
+<div class="container">
+	<h4> Order Detail for Order#:  {{order.order_id}}</h4>
+	<h6> Purchase Date:  {{order.purchase_date}}</h6>
+	
+	<table class="table">
+		<tbody>
+		  	{% for product in products %}
+		  	<tr>
+		      <td>
+		      	<a href="/productinfo?_id={{ product.id }}">
+                    <img style="width: 100px; height: 100px; display: block;" alt="{{product.name}}" src="../{{ product.picture_url}}">
+                </a>
+		      </td>
+		      <td>
+		      	<p >{{product.name}}</p>
+		      	<p>{{product.description}}</p>
+		      	<p>Price: {{product.price}}</p>
+		      	<p>QTY: {{product.num}}</p>
+		      </td>
+		    </tr>
+		  	{% endfor %}
+		  	<tr>
+		  	  <td>
+		  	  </td>
+		  	  <td>
+		  	  	<h6> Total Price: {{order.total_price}}</h6>
+		  	  </td>
+		  	</tr>
+		  </tbody>
+		</table> 
+
+	
+
+
+</div>
+{% include "footer.html" %}
