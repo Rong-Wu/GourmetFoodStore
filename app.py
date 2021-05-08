@@ -4,6 +4,7 @@ from flaskext.mysql import MySQL
 from flask import session
 from flask import jsonify
 import math
+import pymysql
 
 app = Flask(__name__)
 
@@ -117,6 +118,95 @@ def validateLogin():
     finally:
         cursor.close()
         con.close()
+
+
+@app.route('/showProfile')
+def showProfile():
+    if not session.get('user_id'):
+        return redirect('/')
+
+    _userid =session.get('user_id')
+
+    try:
+        con = mysql.connect()
+        cursor = con.cursor()
+        
+        cursor.execute("SELECT * FROM tbl_user WHERE id = %s", (_userid))
+
+        data = cursor.fetchall()
+
+        if len(data) > 0:
+            return render_template('profile.html', data = data[0])
+        else:
+            flash("Sorry, user does not exist")
+            return redirect('/')
+
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+    finally:
+        cursor.close()
+        con.close()
+
+
+@app.route('/showPurchases')
+def showPurchases():
+    if not session.get('user_id'):
+        return redirect('/')
+
+    _userid =session.get('user_id')
+
+    try:
+        con = mysql.connect()
+        cursor = con.cursor(pymysql.cursors.DictCursor)
+        
+        cursor.execute("SELECT * FROM tbl_order WHERE user_id = %s", (_userid))
+
+        orders = cursor.fetchall()
+
+        return render_template('orders.html', orders = orders)
+
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+    finally:
+        cursor.close()
+        con.close()
+
+
+@app.route("/viewOrderDetail/<order_id>", methods=['POST','GET'])
+def viewOrderDetail(order_id):
+    if not session.get('user_id'):
+        return redirect('/')
+    try:
+        con = mysql.connect()
+        cursor = con.cursor(pymysql.cursors.DictCursor)
+        
+        # get that specific order from tbl_order //for total price and date
+        print("first")
+        cursor.execute("SELECT * FROM tbl_order WHERE order_id = %s", (order_id))
+        order = cursor.fetchone()
+
+        # get all the items/products and quantity from tbl_order_detail
+        cursor.execute("SELECT * FROM tbl_order_detail WHERE order_id = %s", (order_id))
+        items = cursor.fetchall()
+
+        products = []
+        #get the detail of each product
+        for item in items:
+            print(item['product_id'])
+            cursor.execute("SELECT * FROM tbl_product WHERE id = %s", (item['product_id']))
+            product = cursor.fetchone()
+            print(product)
+            product['num'] = item['num']
+            products.append(product)
+
+        return render_template('orderDetail.html', order = order, products = products)
+
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+    finally:
+        cursor.close()
+        con.close()
+
 
 @app.route("/search", methods=['POST', 'GET'])
 def search():
