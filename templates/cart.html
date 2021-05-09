@@ -28,10 +28,10 @@
                     <tr>
                         <td>
                             <div>
-                                <a class="thumbnail pull-left" href="#">
+                                <a class="thumbnail pull-left" href="/productinfo?_id={{ key }}">
                                 <img style="width: 100px; height: 100px; display: block;" alt="100x100" src="/{{ session['cart_item'][key]['image'] }}"></a>
                                 
-                                <a href="#">{{session['cart_item'][key]['name']}}</a>
+                                <a href="/productinfo?_id={{ key }}"> {{session['cart_item'][key]['name']}}</a>
                             
                             </div>
                         </td>
