@@ -1,0 +1,73 @@
+{% include "header.html" %}
+
+<div class="container">
+    <div class="header">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+          <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                <a class="nav-link" href="/addproduct">Add Product</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="/logout">Logout</a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <h3 class="text-muted">Edit item</h3>
+        <h4> Edit a current product</h4>
+    </div>
+
+    <section>
+
+      <form class="form-horizontal" method="post" action="/addItem">
+        <fieldset>
+          <legend>Add Your New Product Here</legend>
+
+          <div class="form-group">
+              <label class="col-md-4 control-label" for="txtTitle">Name</label>
+              <div class="col-md-4">
+                <input type="text" name="inputname" id="txtName" placeholder="input Name">
+              </div>
+          </div>
+
+          <div class="form-group">
+              <label class="col-md-4 control-label" for="txtDesc">Description</label>
+               <div class="col-md-4">
+                <input type="text" name="inputDescription" id="txtDesc" placeholder="input Description">
+              </div>
+          </div>
+
+          <div class="form-group">
+              <label class="col-md-4 control-label" for="txtInven">Inventory</label>
+               <div class="col-md-4">
+                <input type="text" name="inputInventory" id="txtInven" placeholder="input Inventory">
+              </div>
+          </div>
+
+          <div class="form-group">
+              <label class="col-md-4 control-label" for="txtPrice">Price</label>
+               <div class="col-md-4">
+                <input type="text" name="inputPrice" id="txtPrice" placeholder="input Price">
+              </div>
+          </div>
+
+          <div class="form-group">
+              <label class="col-md-4 control-label" for="imgPict">Picture</label>
+               <div class="col-md-4">
+                <input type="file" name="inputPicture" id="imgPict" accept="../static/img/*">
+              </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-md-4 control-label" for="singlebutton"></label>
+            <div class="col-md-4">
+              <input id="singlebutton" name="singlebutton" class="btn btn-primary" type="submit" value="Submit" />
+            </div>
+          </div>
+
+        </fieldset>
+
+    </form>
+    </section>
+{% include "footer.html" %}
