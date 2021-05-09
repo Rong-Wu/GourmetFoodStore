@@ -302,38 +302,39 @@ def addToCart():
             row = cursor.fetchone()
 
             all_total_price = 0
-            all_tatal_quantity = 0 
+            all_total_quantity = 0 
 
-            itemArray = {row['id']:{'name': row['name'], 'quantity':qty, 'price':row['price'],'image':row['picture_url'],'total_price':qty*row['price']}}
- 
+            itemArray = {str(row['id']):{'name': row['name'], 'quantity':qty, 'price':row['price'],'image':row['picture_url'],'total_price':qty*row['price']}}
         
-        
-            session.modifed =True
+            session.modified =True
+            # if cart is not empty
             if 'cart_item' in session:
-                if row['id'] in seesion ['cart_item']:
+                # if item already in cart
+                if str(row['id']) in session ['cart_item']:
                     for key,value in session['cart_item'].items():
-                        if row['id'] == key:
-                            old_quantity = session['cart_item'][key]['quantity']
+                        if str(row['id']) == key:
+                            old_quantity = int(session['cart_item'][key]['quantity'])
                             total_quantity = old_quantity + qty
                             session['cart_item'][key]['quantity']=total_quantity
                             session['cart_item'][key]['total_price']= total_quantity*row['price']
-                    
+                
+                # if item not in the cart
                 else:
-                    session['cart_item'] = array_merge(session['car_item'],itemArray)
+                    session['cart_item'] = array_merge(session['cart_item'],itemArray)
                 
                 for key, value in session['cart_item'].items():
                     ind_quantity = int(session['cart_item'][key]['quantity'])
-                    ind_price = float(session['cart_item'][key]['price']) 
+                    ind_price = float(session['cart_item'][key]['total_price']) 
                     all_total_quantity = all_total_quantity + ind_quantity
                     all_total_price = all_total_price + ind_price
             
-
+            # if cart is empty
             else:
                 session['cart_item'] = itemArray
-                all_tatal_quantity = all_tatal_quantity + qty
+                all_total_quantity = all_total_quantity + qty
                 all_total_price = all_total_price + qty*row['price']
 
-            session['all_total_quantity'] = all_tatal_quantity
+            session['all_total_quantity'] = all_total_quantity
             session['all_total_price'] = all_total_price
             # flash('Item successfully added to cart!!','success')
             return redirect('/')
@@ -353,13 +354,7 @@ def cart():
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM tbl_user where id= %s ",(_userid))                                                                                                      
         _username = cursor.fetchone()
-
-
-        # if 'cart_item' in session:
-        #     return render_template('cart.html',UserName = _UserName)
-        # else:
-        #     return render_template('home.html', message = 'Cart is empty, choose your Gourmet !!!')
-        return render_template('cart.html', username=_username)
+        return render_template('cart.html', username=_username[0])
     else: 
         return redirect('/showSignin')
 
@@ -402,6 +397,7 @@ def emptyCart():
         return render_template('error.html',error = str(e))
 
 def array_merge(first_array, second_array):
+    print("mergeeeeeeeeeeeeeeeeeeee3333333333333333333333")
     if isinstance(first_array,list) and isinstance(second_array, list):
         return first_array + second_array
     elif isinstance(first_array, dict) and isinstance(second_array, dict):
