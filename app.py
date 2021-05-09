@@ -458,24 +458,29 @@ def checkout():
             
             conn = mysql.connect()
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO tbl_order (user_id, total_price) VALUES '(%s,%s)' ",(_userid, all_total_price)) 
-            _orderid = cursor.fetchone()
-            # for key, value in session['cart_item'].items():
-            #     _price = session['cart_item'][key]['price']
-            #     _num = session['cart_item'][key]['quantity']
-            #     cursor.execute("INSERT INTO tbl_order_detail(order_id, product_id, price,num) value (%s,%s,%s,%s) ",(_order_id,_userid, _price,_num))                                                                                                   
-            
+            cursor.execute("INSERT INTO tbl_order (user_id, total_price) VALUES (%s,%s) ",(_userid, all_total_price)) 
+            # _orderid = cursor.fetchall()
+            conn.commit()
+            # _orderid = LAST_INSERT_ID() 
+            #if we can get the order id
+            cursor.execute("SELECT order_id FROM tbl_order WHERE user_id =%s ORDER BY order_id DESC ",(_userid)) 
+            _orderid = cursor.fetchall()
 
-           
-        
+            for key, value in session['cart_item'].items():
+                _price = session['cart_item'][key]['price']
+                _num = session['cart_item'][key]['quantity']
+                cursor.execute("INSERT INTO tbl_order_detail (order_id, product_id, price, num) VALUES (%s,%s,%s,%s) ",(_orderid[0][0],key, _price,_num))                                                                                                   
+                conn.commit()
+
             cursor.execute("SELECT * FROM tbl_user WHERE id = %s", (_userid))
             data = cursor.fetchall()
 
             if len(data) > 0:
                 # empty the shop cart
                 session.pop('cart_item') 
-
-                return render_template('checkout.html',data=data[0], order_id=_orderid,num= all_total_quantity, all_total_price= all_total_price)
+                
+                return render_template('checkout.html',data=data[0], order_id=_orderid[0][0],
+                                        num= all_total_quantity, all_total_price= all_total_price)
             return render_template('checkout.html')
         else:           
             return redirect('/') 
@@ -483,6 +488,7 @@ def checkout():
 
     except Exception as e:
         return render_template('error.html',error = str(e))    
+
 
 
 
