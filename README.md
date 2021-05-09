@@ -52,13 +52,14 @@ whole project have these pages:
         - Read (view-only)
 
 
-To run this project:
-**Prepare**
+**To run this project**
+
+1. Environment Prepare**
 Database: 
 python
 flask
 
 
-**Run**
+2.**Run**
 cd to the current folder
 python app.py
