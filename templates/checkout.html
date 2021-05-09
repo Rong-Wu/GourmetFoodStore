@@ -1,0 +1,57 @@
+
+{% include "header.html" %}
+
+<div class="container">
+
+    <h4> Account Information </h4>
+    <table class="table">
+      <tbody>
+        <tr>
+          <th scope="row">Name:</th>
+          <td>{{data[3]}}</td>
+        </tr>
+        <tr>
+          <th scope="row">Email:</th>
+          <td>{{data[1]}}</td>
+        </tr>
+        <tr>
+          <th scope="row">Purchases:</th>
+          <td><a href="/showPurchases">Order History</a></td>
+        </tr>
+      </tbody>
+    </table> 
+</div>
+
+</div>
+
+<div class="container">
+    <div>  
+        <h5 class="text-success">Check Out Success!!!</h5>
+        </hr>
+        <h4><a class="nav-link text-success text-right" href="/">Continue Shop</a></h4>
+
+    </div>
+        
+</div>
+<div class="container">
+    <h4>Order Summary</h4> 
+    <table class="table">
+      <tbody>
+        <tr>
+          <th scope="row">Order ID:</th>
+          <td>?</td>
+        </tr>
+        <tr>
+          <th scope="row">Total Quantity:</th>
+          <td>?</td>
+        </tr>
+        <tr>
+          <th scope="row">Total Price:</th>
+          <td>$? </td>
+        </tr>
+      </tbody>
+    </table> 
+</div>
+
+</div>
+{% include "footer.html" %}
