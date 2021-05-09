@@ -7,6 +7,9 @@ import math
 import pymysql
 import time
 import os
+import re
+import bcrypt
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
@@ -55,41 +58,53 @@ def main():
 def showSignUp():
     return render_template('signup.html')
 
-@app.route('/signUp',methods=['POST'])
+@app.route('/signUp',methods=['POST']) 
 def signUp():
-
+    
     _name = request.form['inputName']
     _email = request.form['inputEmail']
     _password = request.form['inputPassword']
-    _isadmin = 0
 
+    
+    _isadmin = 0
+  
     # validate the received values
     if _name and _email and _password:
-
-        conn = mysql.connect()
-        cursor = conn.cursor()
-
-        #check if user name or email already exist
-        cursor.execute("SELECT * FROM tbl_user WHERE name = %s", (_name))
-        if cursor.fetchone() is not None:
-            return render_template('signup.html', error = "That username is already taken, please choose another")
-
-        cursor.execute("SELECT * FROM tbl_user WHERE email = %s", (_email))
-        if cursor.fetchone() is not None:
-            return render_template('signup.html', error = "That email is already taken, please choose another")
-
-        # create new user
-        cursor.execute("INSERT INTO tbl_user(name, email, password,is_admin) VALUES (%s, %s, %s, %s)", (_name, _email, _password, _isadmin))
-        data = cursor.fetchall()
-
-        if len(data) == 0:
-            conn.commit()
-            return render_template('signup.html', message = 'User created successfully !')
+        if not password_check(_password):
+            return render_template('signup.html', error = 'password is too weak')
         else:
-            return json.dumps({'error':str(data[0])})
+            salt = bcrypt.gensalt()
+            _hashedPass = bcrypt.hashpw(_password.encode('utf-8'),salt)
+            try:
+                conn = mysql.connect()
+                cursor = conn.cursor() 
 
+                #check if user name or email already exist
+                cursor.execute("SELECT * FROM tbl_user WHERE name = %s", (_name))
+                if cursor.fetchone() is not None:   
+                    return render_template('signup.html', error = "That username is already taken, please choose another")
+                
+                cursor.execute("SELECT * FROM tbl_user WHERE email = %s", (_email))
+                if cursor.fetchone() is not None:   
+                    return render_template('signup.html', error = "That email is already taken, please choose another")
+
+                # create new user
+                cursor.execute("INSERT INTO tbl_user(name, email, password,is_admin) VALUES (%s, %s, %s, %s)", (_name, _email, _hashedPass, _isadmin))
+                data = cursor.fetchall() 
+                
+                if len(data) == 0:
+                    conn.commit()
+                    return render_template('signup.html', message = 'User created successfully !')
+                else:
+                    return json.dumps({'error':str(data[0])})
+            except Exception as e:
+                return render_template('error.html',error = str(e))
+            finally:
+                cursor.close()
+                conn.close()
     else:
-        return json.dumps({'error':'Enter the required fields!'})
+        return render_template('signup.html', error = "Enter the required fields!")
+
 
 
 @app.route('/showSignin')
@@ -123,17 +138,19 @@ def validateLogin():
 
         con = mysql.connect()
         cursor = con.cursor()
+        
+
         cursor.execute("SELECT * FROM tbl_user WHERE email = %s", (_email))
+
         data = cursor.fetchall()
+
+
         if len(data) > 0:
-            session['user_id'] = data[0][0]
-            if str(data[0][2]) == _password:
-                if int(data[0][4]) != 0:
-                    session['is_admin'] = True
-                    return redirect(url_for('admin'), code=302)
-                else:
-                    # session['user_id'] = data[0][0]
-                    return redirect('/') #login success
+            hashed = data[0][2]
+            if bcrypt.checkpw(_password.encode('utf-8'), hashed.encode('utf-8')):
+            # if str(data[0][2]) == _password:
+                session['user_id'] = data[0][0]
+                return redirect('/') #login success
             else:
                 return render_template('signin.html', error = 'Password incorrect, please try enter correct password')
         else:
@@ -144,7 +161,6 @@ def validateLogin():
     finally:
         cursor.close()
         con.close()
-
 
 
 
