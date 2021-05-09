@@ -1,0 +1,67 @@
+{% include "header.html" %}
+
+<script src="../static/js/jquery.3.4.1.min.js"></script>
+
+<script>
+  $(function(){
+    $.ajax({
+      url:'/showprod',
+      dataType: 'json',
+      type: 'GET',
+      success: function(data){
+        if (data.length === 0)
+           $('.prod').append("<p>nothing to display</p>")
+        else {
+          data.forEach(item =>{
+            let prodid = item[0];
+            let prodname = item[1];
+            let proddescription = item[2];
+            let prodinventory = item[3];
+            let prodprice = item[4];
+            let prodpicture = "<img style='width: 100%; height: 300px; display: block;' alt='100%x300' src='{{ item[5] }}'>";
+            let result = "<tr><td>" +prodid+ "</td><td>"+prodname+ "</td><td>" +proddescription+ "</td><td>" +prodinventory+"</td><td>" +prodprice+"</td><td>" +prodpicture+ "</td><td><a  class='btn btn-info' href = '/editproduct/"+ prodid +  "' type = 'submit'>Edit</a></td><td><a class = 'btn btn-danger' href = '/deleteprod/" + prodid + "' >Delete</a></td></tr>"
+            $("table").append(result);
+          });
+        }
+      },
+    });
+  });
+</script>
+
+<div class="container">
+    <div class="header">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+          <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                <a class="nav-link" href="/addproduct">Add Product</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="/logout">Logout</a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        <h3 class="text-muted">Product List</h3>
+        <h4> Welcome to Admin Portal</h4>
+        <div class = "prod">
+          <table class = "table">
+            <tr>
+              <th>Id</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Inventory</th>
+              <th>Price</th>
+              <th>Picture</th>
+              <th>Edit</th>
+              <th>Delete</th>
+            </tr>
+          </table>
+        </div>
+
+    </div>
+
+</div>
+
+{% include "footer.html" %}
