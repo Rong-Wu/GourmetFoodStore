@@ -3,16 +3,14 @@
 
 <div class="container">
     <div>
-        <h3>Hello, {{username}}</h3>
-        <h4>Shoping Cart</h4> 
+        <h3 class="text-success">Hello, {{username}}</h3>
+        <h4 class="text-info">Shoping Cart</h4> 
     </div>
     <div class="row">
-        <div class="container-table-cart pos-relative">
-            <div class="wrap-table-shopping-cart bgwhite">
+        <div class="container-fluid pos-relative">
                 {% if 'cart_item' in session %}
-                <p><a class="nav-link" href="/emptyCart">Empty Cart</a></p>
-
-                <table>
+                <p><a class="nav-link text-right " href="/emptyCart">Empty Cart</a></p>
+                <table class="table">
                     <thead>
                         <tr>
                             <th>Product</th>
@@ -31,14 +29,14 @@
                         <td>
                             <div>
                                 <a class="thumbnail pull-left" href="#">
-                                <img style="width: 72px; height: 72px; display: block;" alt="72x72" src="/{{ session['cart_item'][key]['image'] }}"></a>
+                                <img style="width: 100px; height: 100px; display: block;" alt="100x100" src="/{{ session['cart_item'][key]['image'] }}"></a>
                                 
                                 <a href="#">{{session['cart_item'][key]['name']}}</a>
                             
                             </div>
                         </td>
                         <td>
-                            <input type="text" class="form-control" value="{{quantity}}"/>
+                            <input type="text" class="form-control" value="{{quantity}}" size="4"/>
                         </td>
                         <td><strong>${{price}}</strong></td>
                         <td><strong>${{item_price}}</strong></td>
@@ -55,14 +53,20 @@
                     </tr>
                     </tbody>             
                 </table>
-                <button id="btnSignUp" class="btn btn-lg yellow-button" type="submit">Check Out</button>
-
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button id="btnSignUp" class="btn btn-lg yellow-button" type="submit"><a href="/checkout">Check Out</a></button>
+                    <p></p>
+                </div>
                 {% else: %}
-                <div><p>Your Cart is Empty</p></div>
+                <div>
+                    <p></p>
+                    <h3 class="text-success text-center"> Your Cart is Empty</h3>
+                    
+                </div>
                 {% endif %}
 
             </div>
-        </div>
+        
     </div>
 </div>
 {% include "footer.html" %}
