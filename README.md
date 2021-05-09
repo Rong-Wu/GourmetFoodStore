@@ -54,12 +54,12 @@ whole project have these pages:
 
 **To run this project**
 
-1. Environment Prepare**
-Database: 
-python
-flask
+    1. Environment Prepare
+        - Database: 
+        - python
+        - flask
 
 
-2.**Run**
-cd to the current folder
-python app.py
+    2.**Run**
+        cd to the current folder
+        python app.py
