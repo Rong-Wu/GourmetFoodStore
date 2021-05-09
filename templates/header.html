@@ -43,14 +43,20 @@
 
                     {% if session.get('user_id') %}
                     <li class="nav-item">
-                      <a class="nav-link" href="#">Profile</a>
+                      <a class="nav-link" href="/showProfile">Profile</a>
                     </li>
                     <li class="nav-item">
                       <a class="nav-link" href="/logout">Logout</a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link" href="#">Cart</a>
+                      <a class="nav-link" href="/cart">Cart</a>
+
                     </li>
+                    {% if 'cart_item' in session %}
+                    <li class="nav-item">
+                      <a class="nav-link" href="/emptyCart">EmptyCart</a>  
+                    </li>
+                    {% endif %}
                     {% else %}
 
                     <li class="nav-item">

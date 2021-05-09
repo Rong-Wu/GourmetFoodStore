@@ -30,15 +30,9 @@
                   <p class="card-text"><span >Stock left:</span><span> {{product[3]}}</span></p>
                     </br>
                   <p class="text-left text-danger"> <span>Qty:</span>
-                    <select class="form-select" aria-label="Default select example">
-                        <option selected>1</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                    </select>
+                    <input type="email" name="inputQty" class="form-control" value="1">
                   </p> 
-                  
-                  <p><a href="#" id="{{ product[0] }}"class="btn btn-warning btn-block" role="button">Add to Cart</a></p>
+                  <p><a href="/addToCart?_id={{product[0]}}" class="btn btn-warning btn-block" role="button">Add to Cart</a></p>
                 </div>
             </div>
                           

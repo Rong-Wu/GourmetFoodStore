@@ -19,7 +19,12 @@
                         <p class="text-center text-danger"><a href="/productinfo?_id={{ product[0] }}"> <span>{{ product[1] }}</span></a>
                             <span>&nbsp&nbsp&nbsp${{ product[4] }}</span>
                         </p>                   
-                        <p><a href="#" id="{{ product[0] }}"class="btn btn-warning btn-block" role="button">Add to Cart</a></p>
+                        <p> 
+                            <!-- <form>
+                            <input type="text" name="inputQty" id="inputQTY" class="form-control" value="1">
+                            </form> -->
+                            <a href="/addToCart?_id={{product[0]}}" class="btn btn-warning btn-block" role="button">Add to Cart</a>
+                        </p>
                     </div>
                 </div>
             </div>
