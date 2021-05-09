@@ -1,0 +1,53 @@
+{% include "header.html" %}
+
+<div class="container">
+    <div class="header">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+          <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                <a class="nav-link" href="/addproduct">Add Product</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="/logout">Logout</a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        <h3 class="text-muted"> Welcome to Admin Portal</h3>
+        <div class = "prod">
+
+          <table class="table">
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Inventory</th>
+              <th>Price</th>
+              <th>Picture</th>
+              <th>Catagory</th>
+              <th>Edit</th>
+              <th>Delete</th>
+            </tr>
+
+              {% for product in products %}
+            <tr>
+              <th>{{product[0]}}</th>
+              <th>{{product[1]}}</th>
+              <th>{{product[3]}}</th>
+              <th>{{product[4]}}</th>
+                <th><img src="{{product[5]}}" style="width: 50px;height: 50px"></th>
+              <th>{% if product[6]==1 %}Bread{% elif product[6]==2 %}Cookie{% elif product[6]==3 %}Rice Pastry{% else %}Snack{% endif %}</th>
+              <th><a href="/editproduct?_id={{product[0]}}">Edit</a></th>
+              <th><a href="/deleteprod?_id={{product[0]}}">Delete</a></th>
+            </tr>
+            {% endfor %}
+          </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% include "footer.html" %}
