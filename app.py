@@ -70,8 +70,15 @@ def signUp():
   
     # validate the received values
     if _name and _email and _password:
+        # print("checking passssssssssssss")
         if not password_check(_password):
-            return render_template('signup.html', error = 'password is too weak')
+            return render_template('signup.html', error = '''Password is too weak.\n
+                Please enter a password with: \n
+                6 characters length or more;\n
+                1 digit or more;\n
+                1 uppercase letter or more;\n
+                1 lowercase letter or more\n
+                ''')
         else:
             salt = bcrypt.gensalt()
             _hashedPass = bcrypt.hashpw(_password.encode('utf-8'),salt)
@@ -107,6 +114,7 @@ def signUp():
 
 
 
+
 @app.route('/showSignin')
 def showSignin():
     return render_template('signin.html')
@@ -138,19 +146,19 @@ def validateLogin():
 
         con = mysql.connect()
         cursor = con.cursor()
-        
-
         cursor.execute("SELECT * FROM tbl_user WHERE email = %s", (_email))
-
         data = cursor.fetchall()
-
-
         if len(data) > 0:
+            
             hashed = data[0][2]
             if bcrypt.checkpw(_password.encode('utf-8'), hashed.encode('utf-8')):
-            # if str(data[0][2]) == _password:
                 session['user_id'] = data[0][0]
-                return redirect('/') #login success
+                if int(data[0][4]) != 0:
+                    session['is_admin'] = True
+                    return redirect(url_for('admin'), code=302)
+                else:
+                    # session['user_id'] = data[0][0]
+                    return redirect('/') #login success
             else:
                 return render_template('signin.html', error = 'Password incorrect, please try enter correct password')
         else:
@@ -328,8 +336,9 @@ def productinfo():
 
 @app.route('/logout')
 def logout():
-    session.pop('user_id',None) #destroy the session
-    session.pop('is_admin', None)
+    # session.pop('user_id',None) #destroy the session
+    # session.pop('is_admin', None)
+    session.clear()
     return redirect('/')
 
 
@@ -589,7 +598,35 @@ def array_merge(first_array, second_array):
          return first_array.union (second_array)
     return False
 
+def password_check(password):
+    """
+    Verify the strength of 'password'
+    Returns a dict indicating the wrong criteria
+    A password is considered strong if:
+        6 characters length or more
+        1 digit or more
+        1 uppercase letter or more
+        1 lowercase letter or more
+    """
 
+    # calculating the length
+    length_error = len(password) < 6
+
+    # searching for digits
+    digit_error = re.search(r"\d", password) is None
+
+    # searching for uppercase
+    uppercase_error = re.search(r"[A-Z]", password) is None
+
+    # searching for lowercase
+    lowercase_error = re.search(r"[a-z]", password) is None
+
+    # overall result
+    password_ok = not ( length_error or digit_error or uppercase_error or lowercase_error )
+
+    print("in checking")
+    print(password_ok)
+    return password_ok
 
 if __name__ == "__main__":
     app.run(debug=True)
