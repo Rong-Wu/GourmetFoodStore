@@ -1,6 +1,10 @@
 #GourmetFoodStore
-whole project have these pages:
 
+**Whole Project Based On**
+ 
+    Python Flask + MySQL + Bootstrap + CSS
+
+whole project have these pages:
 **Home Page**
  
     1. Showing all active products (title and price)
