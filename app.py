@@ -5,6 +5,9 @@ from flask import session
 from flask import jsonify
 import math
 import pymysql
+import time
+import os
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 
@@ -18,6 +21,11 @@ app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 app.config['MYSQL_DATABASE_PORT'] = 8889
 mysql.init_app(app) 
 
+# app.config['MYSQL_DATABASE_USER'] = 'dotasks'
+# app.config['MYSQL_DATABASE_PASSWORD'] = 'task123456'
+# app.config['MYSQL_DATABASE_DB'] = 'tasks'
+# app.config['MYSQL_DATABASE_HOST'] = '49.233.184.42'
+# app.config['MYSQL_DATABASE_PORT'] = 3306
 
 app.secret_key = 'secret key'
 
@@ -26,7 +34,7 @@ def main():
     try:
         if session.get('user_id'):
             _userid =session.get('user_id')
-        
+
         conn = mysql.connect()
         cursor = conn.cursor()
 
@@ -37,44 +45,43 @@ def main():
             conn.commit()
             return render_template('home.html',products=data)
         else:
-            return render_template ('error.html', error='no products')
-       
+            return render_template('error.html', error='no products')
+
     except Exception as e:
         return render_template('error.html',error = str(e))
 
-	
 
-@app.route('/showSignUp') 
+@app.route('/showSignUp')
 def showSignUp():
     return render_template('signup.html')
 
-@app.route('/signUp',methods=['POST']) 
+@app.route('/signUp',methods=['POST'])
 def signUp():
-    
+
     _name = request.form['inputName']
     _email = request.form['inputEmail']
     _password = request.form['inputPassword']
-    _is = 0
- 
+    _isadmin = 0
+
     # validate the received values
     if _name and _email and _password:
 
         conn = mysql.connect()
-        cursor = conn.cursor() 
+        cursor = conn.cursor()
 
         #check if user name or email already exist
         cursor.execute("SELECT * FROM tbl_user WHERE name = %s", (_name))
-        if cursor.fetchone() is not None:   
+        if cursor.fetchone() is not None:
             return render_template('signup.html', error = "That username is already taken, please choose another")
-        
+
         cursor.execute("SELECT * FROM tbl_user WHERE email = %s", (_email))
-        if cursor.fetchone() is not None:   
+        if cursor.fetchone() is not None:
             return render_template('signup.html', error = "That email is already taken, please choose another")
 
         # create new user
         cursor.execute("INSERT INTO tbl_user(name, email, password,is_admin) VALUES (%s, %s, %s, %s)", (_name, _email, _password, _isadmin))
-        data = cursor.fetchall() 
-        
+        data = cursor.fetchall()
+
         if len(data) == 0:
             conn.commit()
             return render_template('signup.html', message = 'User created successfully !')
@@ -85,10 +92,28 @@ def signUp():
         return json.dumps({'error':'Enter the required fields!'})
 
 
-@app.route('/showSignin') 
+@app.route('/showSignin')
 def showSignin():
     return render_template('signin.html')
 
+
+@app.route('/admin', methods=['GET'])
+def admin():
+    try:
+        con = mysql.connect()
+        cursor = con.cursor()
+        if session.get('is_admin', None):
+            cursor.execute("SELECT * FROM tbl_product")
+            data = cursor.fetchall()
+            return render_template('adminportal.html', products=data)
+        else:
+            return render_template('signin.html', error="You don't have permission")
+
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+    finally:
+        cursor.close()
+        con.close()
 
 @app.route('/validateLogin', methods=['POST'])
 def validateLogin():
@@ -121,6 +146,8 @@ def validateLogin():
         con.close()
 
 
+
+
 @app.route('/showProfile')
 def showProfile():
     if not session.get('user_id'):
@@ -131,7 +158,7 @@ def showProfile():
     try:
         con = mysql.connect()
         cursor = con.cursor()
-        
+
         cursor.execute("SELECT * FROM tbl_user WHERE id = %s", (_userid))
 
         data = cursor.fetchall()
@@ -158,7 +185,7 @@ def showPurchases():
     try:
         con = mysql.connect()
         cursor = con.cursor(pymysql.cursors.DictCursor)
-        
+
         cursor.execute("SELECT * FROM tbl_order WHERE user_id = %s", (_userid))
 
         orders = cursor.fetchall()
@@ -178,7 +205,7 @@ def viewOrderDetail(order_id):
     try:
         con = mysql.connect()
         cursor = con.cursor(pymysql.cursors.DictCursor)
-        
+
         # get that specific order from tbl_order //for total price and date
         print("first")
         cursor.execute("SELECT * FROM tbl_order WHERE order_id = %s", (order_id))
@@ -212,15 +239,15 @@ def search():
     try:
         if session.get('user_id'):
             _userid =session.get('user_id')
-        
+
         _keyword = request.form['search']
-            
-        
+
+
         conn = mysql.connect()
         cursor = conn.cursor()
         #SearchContent = "SELECT * FROM tbl_product where name like %{}% ".formet(_keyword)
         #cursor.execute(SearchContent)
-        cursor.execute("SELECT * FROM tbl_product where name like %s ",('%'+_keyword+'%'))                                                                                                       
+        cursor.execute("SELECT * FROM tbl_product where name like %s ",('%'+_keyword+'%'))
         data = cursor.fetchall()
 
         if len(data)>= 0 :
@@ -228,7 +255,7 @@ def search():
             return render_template('SearchResult.html',result=data)
         else:
             return render_template ('error.html', error='no search result')
-       
+
     except Exception as e:
         return render_template('error.html',error = str(e))
 
@@ -238,14 +265,15 @@ def Category():
     try:
         if session.get('user_id'):
             _userid =session.get('user_id')
-        
+
         if request.method == 'GET':
             cate_id=request.args.get('_id')
-        
+
         conn = mysql.connect()
         cursor = conn.cursor()
-        
-        cursor.execute("SELECT * FROM tbl_product WHERE category_id =%s  ",(cate_id))                                                                                                    
+        #SearchContent = "SELECT * FROM tbl_product where name like %{}% ".formet(_keyword)
+        #cursor.execute(SearchContent)
+        cursor.execute("SELECT * FROM tbl_product where category_id= %s",(cate_id))
         data = cursor.fetchall()
 
         if len(data)>= 0 :
@@ -253,7 +281,7 @@ def Category():
             return render_template('SearchResult.html',result=data)
         else:
             return render_template ('error.html', error='no search result')
-       
+
     except Exception as e:
         return render_template('error.html',error = str(e))
 
@@ -268,8 +296,8 @@ def productinfo():
 
             conn = mysql.connect()
             cursor = conn.cursor()
-        
-            cursor.execute("SELECT * FROM tbl_product where id= %s ",(product_id))                                                                                                      
+
+            cursor.execute("SELECT * FROM tbl_product where id= %s ",(product_id))
             data = cursor.fetchall()
 
         if len(data)>= 0 :
@@ -277,7 +305,7 @@ def productinfo():
             return render_template('productinfo.html',result=data)
         else:
             return render_template ('error.html', error='no search result')
-       
+
     except Exception as e:
         return render_template('error.html',error = str(e))
 
@@ -285,7 +313,9 @@ def productinfo():
 @app.route('/logout')
 def logout():
     session.pop('user_id',None) #destroy the session
+    session.pop('is_admin', None)
     return redirect('/')
+
 
 @app.route('/addToCart',methods=['POST', 'GET'])
 def addToCart():
@@ -412,7 +442,7 @@ def checkout():
             
             conn = mysql.connect()
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO tbl_order (user_id, total_price) VALUES (%s,%s) ",(_userid, all_total_price)) 
+            cursor.execute("INSERT INTO tbl_order (user_id, total_price) VALUES '(%s,%s)' ",(_userid, all_total_price)) 
             _orderid = cursor.fetchone()
             # for key, value in session['cart_item'].items():
             #     _price = session['cart_item'][key]['price']
@@ -426,7 +456,10 @@ def checkout():
             data = cursor.fetchall()
 
             if len(data) > 0:
-                return render_template('checkout.html',data=data[0], order_id=_orderid)
+                # empty the shop cart
+                session.pop('cart_item') 
+
+                return render_template('checkout.html',data=data[0], order_id=_orderid,num= all_total_quantity, all_total_price= all_total_price)
             return render_template('checkout.html')
         else:           
             return redirect('/') 
@@ -445,25 +478,8 @@ def emptyCart():
     except Exception as e:
         return render_template('error.html',error = str(e))
 
-@app.route('/admin', methods=['GET'])
-def admin():
-    try:
-        con = mysql.connect()
-        cursor = con.cursor()
-        if session.get('is_admin', None):
-            cursor.execute("SELECT * FROM tbl_product")
-            data = cursor.fetchall()
-            return render_template('adminportal.html', products=data)
-        else:
-            return render_template('signin.html', error="You don't have permission")
 
-    except Exception as e:
-        return render_template('error.html',error = str(e))
-    finally:
-        cursor.close()
-        con.close()
-	
-	
+
 @app.route('/addproduct', methods=['GET', 'POST'])
 def add_product():
     con = mysql.connect()
@@ -542,13 +558,11 @@ def delete_item():
     return redirect('/admin')
 
 
-
-
 def array_merge(first_array, second_array):
     if isinstance( first_array,list) and isinstance(second_array, list):
         return first_array + second_array
     elif isinstance(first_array, dict) and isinstance(second_array, dict):
-        return dict( list(first_array.items()) + list(second_array.items()) )
+        return dict( list(first_array.items())+ list(second_array.items()) )
     elif isinstance(first_array, set) and isinstance(second_array, set):
          return first_array.union (second_array)
     return False
@@ -556,9 +570,5 @@ def array_merge(first_array, second_array):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)  
+    app.run(debug=True)
     # app.run()
-
-
-
-
