@@ -88,7 +88,6 @@ def signUp():
 def showSignin():
     return render_template('signin.html')
 
-
 @app.route('/validateLogin', methods=['POST'])
 def validateLogin():
     try:
@@ -147,7 +146,6 @@ def showProfile():
         cursor.close()
         con.close()
 
-
 @app.route('/showPurchases')
 def showPurchases():
     if not session.get('user_id'):
@@ -170,7 +168,6 @@ def showPurchases():
     finally:
         cursor.close()
         con.close()
-
 
 @app.route("/viewOrderDetail/<order_id>", methods=['POST','GET'])
 def viewOrderDetail(order_id):
@@ -261,17 +258,16 @@ def Category():
 
 @app.route("/productinfo", methods=['POST', 'GET'])
 def productinfo():
-    if session.get('user_id'):
-        _userid =session.get('user_id')
     try:
+        if session.get('user_id'):
+            _userid =session.get('user_id')
         if request.method == 'GET':
             product_id=request.args.get('_id')
             session['product_id']= product_id
 
             conn = mysql.connect()
             cursor = conn.cursor()
-        #SearchContent = "SELECT * FROM tbl_product where name like %{}% ".formet(_keyword)
-        #cursor.execute(SearchContent)
+        
             cursor.execute("SELECT * FROM tbl_product where id= %s ",(product_id))                                                                                                      
             data = cursor.fetchall()
 
@@ -290,6 +286,123 @@ def logout():
     session.pop('user_id',None) #destroy the session
     return redirect('/')
 
+
+@app.route('/addToCart',methods=['POST', 'GET'])
+def addToCart():
+    if session.get('user_id'):
+        _userid =session.get('user_id')
+        qty = 1
+        # qty = int(request.form['inputQty'])
+        product_id = int(request.args.get('_id'))
+
+        all_total_price =0
+        all_tatal_quantity =0
+
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT * FROM tbl_product where id= %s ",(product_id))                                                                                                      
+        row = cursor.fetchall()
+
+        itemArray = {row['id']:{'name': row['name'], 'quantity':qty, 'price':row['price'],'image':row['picture_url'],'total_price':qty*row['price']}}
+ 
+        
+        
+        session.modifed =True
+        if 'cart_item' in session:
+            if row['id'] in seesion ['cart_item']:
+                for key,value in session['cart_item'].items():
+                    if row[0] ==key:
+                        old_quantity = int(session['cart_item'][key]['quantity'])
+                        total_quantity = old_quantity + qty
+                        session['cart_item'][key]['quantity']=total_quantity
+                        session['cart_item'][key]['total_price']= total_quantity*row['price']
+                
+            else:
+                session['cart_item'] = array_merge(session['car_item'],itemArray)
+            
+            for key, value in session['cart_item'].items():
+                ind_quantity = int(session['cart_item'][key]['quantity'])
+                ind_price = float(session['cart_item'][key]['price']) 
+                all_total_quantity = all_total_quantity + ind_quantity
+                all_total_price = all_total_price + ind_quantity
+            
+
+        else:
+            session['cart_item'] = itemArray
+            all_tatal_quantity = all_tatal_quantity + qty
+            all_total_price = all_total_price + qty*row['price']
+
+        session['all_total_quantity'] = all_tatal_quantity
+        session['a''_total_price'] = all_total_price
+        # flash('Item successfully added to cart!!','success')
+        return redirect('/')
+    else:
+        return redirect('/showSignin')
+
+@app.route('/cart',methods=['POST', 'GET'])
+def cart():
+    if session.get('user_id'):
+        _userid =session.get('user_id')
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM tbl_product where id= %s ",(_userid))                                                                                                      
+        _UserName = cursor.fetchall()
+
+
+        if 'cart_item' in session:
+            return render_template('cart.html',UserName = _UserName)
+        else:
+            return render_template('home.html', message = 'Cart is empty, choose your Gourmet !!!')
+    else: return redirect('/showSignin')
+
+
+@app.route('/removeFromCart',methods=['POST', 'GET'])
+def removeFromCart():
+    product_id=int(request.args.get('_id'))
+
+    try:
+        all_total_price =0
+        all_total_quantity =0
+        session.modified = True
+
+        for item in session['cart_item'].items():
+            if item[0] == product_id:
+                session['cart_item'].pop(item[0],None)
+                if 'cart_item' in session:
+                    for key, value in session['cart_item'].items():
+                        ind_quantity = session['cart_item'][key]['quantity']
+                        ind_price = session['cart_item'][key]['price'] 
+                        all_total_quantity = all_total_quantity + ind_quantity
+                        all_total_price = all_total_price + ind_quantity
+                break
+        if all_total_quantity ==0:
+            session['cart_item'].clear()
+        else:
+            session['all_total_quantity'] = all_total_quantity
+            session['all_total_price'] = all_total_price
+
+        return render_template('/cart.html')
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+
+@app.route('/emptyCart',methods=['POST', 'GET'])
+def emptyCart():
+    try:
+        session['cart_items'].clear()
+        return redirect('/')
+    
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+
+def array_merge(first_array, second_array):
+    if isinstance( first_array,list) and isinstance(second_array, list):
+        return first_array + second_array
+    elif isinstance(first_array, dict) and isinstance(second_array, dict):
+        return dict( list(first_array.items())+ list(second_array.items()) )
+    elif isinstance(first_array, set) and isinstance(second_array, set):
+         return first_array.union (second_array)
+    return False
 
 
 if __name__ == "__main__":
