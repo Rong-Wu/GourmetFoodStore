@@ -105,7 +105,10 @@ def validateLogin():
 
         if len(data) > 0:
             if str(data[0][2]) == _password:
-                session['user_id'] = data[0][0]
+                if str(data[0][4]) == 1:
+                    return redirect('adminportal.html')
+                else:
+                    session['user_id'] = data[0][0]
                 return redirect('/') #login success
             else:
                 return render_template('signin.html', error = 'Password incorrect, please try enter correct password')
@@ -404,6 +407,51 @@ def array_merge(first_array, second_array):
          return first_array.union (second_array)
     return False
 
+@app.route('/addproduct', methods=['GET', 'POST'])
+def add_product():
+    con = mysql.connect()
+    cursor = con.cursor()
+    try:
+        if request.method == 'GET':
+            return render_template('addproduct.html')
+        else:
+            name = request.form['inputname']
+            description = request.form['inputDescription']
+            inventory = request.form['inputInventory']
+            price = request.form['inputPrice']
+            picture = request.form['inputPicture']
+
+            execute_insert_sql(con, cursor,
+            'insert into tbl_product(name, description, inventory, price, picture_url ) value ("%s", "%s", "%s", %s, %s)' %
+            (name, description, inventory, price, picture))
+            return redirect('/adminportal')
+    except Exception as e:
+        return render_template('error.html', error=str(e))
+
+@app.route('/editproduct/<int:id>', methods=['GET', 'POST'])
+def edit_item(id):
+    con = mysql.connect()
+    cursor = con.cursor()
+    if request.method == 'GET':
+        production = execute_select_sql(cursor, 'select id,name,description,inventory,price,picture from tbl_product where id=%s' % id)
+        return render_template('editproduct.html', name=production[0][1], desc=todo[0][2], inven=todo[0][3], pric=todo[0][4], pict=todo[0][5], id=id)
+    else:
+        name = request.form['inputname']
+        description = request.form['inputDescription']
+        inventory = request.form['inputInventory']
+        price = request.form['inputPrice']
+        picture = request.form['inputPicture']
+        cursor.execute('update tbl_product set name=%s, description=%s, inventory=%s, price=%s, picture_url=%s where id=%s', [name, description,inventory, price, picture, id])
+        con.commit()
+        return redirect('/adminportal')
+
+@app.route('/deleteprod/<int:id>')
+def delete_item(id):
+    con = mysql.connect()
+    cursor = con.cursor()
+        cursor.execute("delete * from tbl_product where id = %s", [id])
+        con.commit()
+        return redirect('/adminportal')
 
 if __name__ == "__main__":
     app.run(debug=True)  
