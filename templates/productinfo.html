@@ -29,10 +29,13 @@
                   <h4 class="card-title text-success">Get your Gourmet</h4>
                   <p class="card-text"><span >Stock left:</span><span> {{product[3]}}</span></p>
                     </br>
-                  <p class="text-left text-danger"> <span>Qty:</span>
-                    <input type="email" name="inputQty" class="form-control" value="1">
-                  </p> 
-                  <p><a href="/addToCart?_id={{product[0]}}" class="btn btn-warning btn-block" role="button">Add to Cart</a></p>
+                  
+                  <form method="post" action="/addToCart">
+                    <input type="hidden" name="productID"  class="form-control" value={{product[0]}} />
+                    <p class="text-left text-danger"> <span>Qty:</span></p>
+                    <input type="text" name="inputQty"  class="form-control" value="1" size="2"/>
+                    <input type="submit" value="Add To Cart" class="btn btn-warning btn-block"/>
+                  </form>
                 </div>
             </div>
                           

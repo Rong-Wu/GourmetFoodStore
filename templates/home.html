@@ -19,12 +19,13 @@
                         <p class="text-center text-danger"><a href="/productinfo?_id={{ product[0] }}"> <span>{{ product[1] }}</span></a>
                             <span>&nbsp&nbsp&nbsp${{ product[4] }}</span>
                         </p>                   
-                        <p> 
-                            <!-- <form>
-                            <input type="text" name="inputQty" id="inputQTY" class="form-control" value="1">
-                            </form> -->
-                            <a href="/addToCart?_id={{product[0]}}" class="btn btn-warning btn-block" role="button">Add to Cart</a>
-                        </p>
+                        
+                        <form method="post" action="/addToCart">
+                            <input type="hidden" name="productID"  class="form-control" value={{product[0]}} />
+                            <input type="text" name="inputQty"  class="form-control" value="1" size="2"/>
+                            <input type="submit" value="Add To Cart" class="btn btn-warning btn-block"/>
+                        </form>
+                        
                     </div>
                 </div>
             </div>
