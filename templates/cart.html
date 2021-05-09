@@ -1,55 +1,47 @@
 
 {% include "header.html" %}
 
-<div class="container-fluid">
+<div class="container">
     <div>  
-        <h4>Shooping Cart</h4> 
-        <div class="dropdown">
-            <button class="dropbtn">Hello, {{UserName}} </button>
-            <div class="dropdown-content">
-                <a href="/orders">Your orders</a>
-                <a href="/profile">Your profile</a>
-                <hr>
-                <a href="/logout">Sign Out</a>
-            </div>
-        </div>
+        <h4>Shoping Cart</h4> 
     </div>
     <div class="row">
         <div class="container-table-cart pos-relative">
             <div class="wrap-table-shopping-cart bgwhite">
                 {% if 'cart_item' in session %}
-                <table class="table-shopping-cart">
-                    <tr class="table-head">
-                        <th class="column-1"></th>
-                        <th class="column-2">Product</th>
-                        <th class="column-3">Quantity</th>
-                        <th class="column-4 p-l-70">Unit Price</th>
-                        <th class="column-5">Subtotal</th>
-                    </tr>
+                <p><a class="nav-link" href="/emptyCart">Empty Cart</a></p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Subtotal</th>
+                            <th>Operation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     {% for key, val in session['cart_item'].items() %}
-                         {set quantity = session['cart_item'][key]['quantity'] %}
-                         {set price = session['cart_item'][key]['price'] %}
-                         {set item_price = session['cart_item'][key]['total_price'] %}
-                    <tr class="table-row">
-                        <td class="col-sm-8 col-md-6">
-                            <div class="media">
+                         {% set quantity = session['cart_item'][key]['quantity'] %}
+                         {% set price = session['cart_item'][key]['price'] %}
+                         {% set item_price = session['cart_item'][key]['total_price'] %}
+                    <tr>
+                        <td>
+                            <div>
                                 <a class="thumbnail pull-left" href="#">
-                                <img style="width: 72px; height: 72px; display: block;" alt="72x72" src="{{ session['cart_item'][key][image] }}"></a>
-                                <div class="media-body">
-                                    <h4 class="media-heading"><a href="#">{{session['cart_item'][key]['name']}}</a></h4>
-                                    <h5></h5>
-                                </div>
+                                <img style="width: 72px; height: 72px; display: block;" alt="72x72" src="/{{ session['cart_item'][key]['image'] }}"></a>
+                                
+                                <a href="#">{{session['cart_item'][key]['name']}}</a>
+                            
                             </div>
                         </td>
-                        <td class="col-sm-1 col-md-1 text-center">
-                            <input type="email" class="form-control" value="{{quantity}}"/>
+                        <td>
+                            <input type="text" class="form-control" value="{{quantity}}"/>
                         </td>
-                        <td class="col-sm-1 col-md-1 text-center"><strong>${{price}}</strong></td>
-                        <td class="col-sm-1 col-md-1 text-center"><strong>${{item_price}}</strong></td>
-                        <td class="col-sm-1 col-md-1 ">
-                                <a href="/removeFromCart?_id={{key}}">Remove</a>
-                        </td>
-                        <td class="column-5">${{item[6]}}</td>
+                        <td><strong>${{price}}</strong></td>
+                        <td><strong>${{item_price}}</strong></td>
+                        <td><a href="/removeFromCart?_id={{key}}">Remove</a></td>
                     </tr>
                     {% endfor %} 
                     <tr>
@@ -59,14 +51,15 @@
                     <tr>
                         <td colspan="4"><h5> Total </h5></td>
                         <td class="text-right"><h3><strong>$ {{session['all_total_price']}}</strong></h3></td>
-                    </tr>             
+                    </tr>
+                    </tbody>             
                 </table>
+                <button id="btnSignUp" class="btn btn-lg yellow-button" type="submit">Check Out</button>
 
                 {% else: %}
-                <div> Your Cart is Empty</div>
+                <div><p>Your Cart is Empty</p></div>
                 {% endif %}
 
-                <button id="btnSignUp" class="btn btn-lg btn-primary btn-block" type="submit">Check Out</button>
             </div>
         </div>
     </div>
