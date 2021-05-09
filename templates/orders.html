@@ -20,7 +20,7 @@
 			      <td>{{order.purchase_date}}</td>
 			      <td>{{order.order_id}}</td>
 			      <td>{{order.total_price}}</td>
-			      <td><button type="button" class="btn yellow-button" onclick="/viewOrderDetail/{{order.order_id}}">View Detail</button></td>
+			      <td><button class="btn btn-lg yellow-button" type="submit"><a href="/viewOrderDetail/{{order.order_id}}">View Detail</a></button></td>
 			    </tr>
 			    {% endfor %}
 			  </tbody>
