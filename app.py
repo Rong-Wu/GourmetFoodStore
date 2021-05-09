@@ -54,7 +54,7 @@ def signUp():
     _name = request.form['inputName']
     _email = request.form['inputEmail']
     _password = request.form['inputPassword']
-    _isadmin = 0
+    _is = 0
  
     # validate the received values
     if _name and _email and _password:
@@ -89,6 +89,7 @@ def signUp():
 def showSignin():
     return render_template('signin.html')
 
+
 @app.route('/validateLogin', methods=['POST'])
 def validateLogin():
     try:
@@ -97,19 +98,14 @@ def validateLogin():
 
         con = mysql.connect()
         cursor = con.cursor()
-        
-
         cursor.execute("SELECT * FROM tbl_user WHERE email = %s", (_email))
-
         data = cursor.fetchall()
-        session['user_id'] = data[0][0]
-
         if len(data) > 0:
+            session['user_id'] = data[0][0]
             if str(data[0][2]) == _password:
-                if int(data[0][4]) == 1: 
-                    cursor.execute("SELECT * FROM tbl_product")
-                    data = cursor.fetchall()                   
-                    return render_template('adminportal.html', products=data)
+                if int(data[0][4]) != 0:
+                    session['is_admin'] = True
+                    return redirect(url_for('admin'), code=302)
                 else:
                     # session['user_id'] = data[0][0]
                     return redirect('/') #login success
@@ -123,8 +119,6 @@ def validateLogin():
     finally:
         cursor.close()
         con.close()
-
-    
 
 
 @app.route('/showProfile')
@@ -451,8 +445,25 @@ def emptyCart():
     except Exception as e:
         return render_template('error.html',error = str(e))
 
+@app.route('/admin', methods=['GET'])
+def admin():
+    try:
+        con = mysql.connect()
+        cursor = con.cursor()
+        if session.get('is_admin', None):
+            cursor.execute("SELECT * FROM tbl_product")
+            data = cursor.fetchall()
+            return render_template('adminportal.html', products=data)
+        else:
+            return render_template('signin.html', error="You don't have permission")
 
-
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+    finally:
+        cursor.close()
+        con.close()
+	
+	
 @app.route('/addproduct', methods=['GET', 'POST'])
 def add_product():
     con = mysql.connect()
@@ -461,54 +472,75 @@ def add_product():
         if request.method == 'GET':
             return render_template('addproduct.html')
         else:
+
             name = request.form['inputname']
             description = request.form['inputDescription']
             inventory = request.form['inputInventory']
             price = request.form['inputPrice']
-            picture = request.form['inputPicture']
-
-            execute_insert_sql(con, cursor,
-            'insert into tbl_product(name, description, inventory, price, picture_url ) value ("%s", "%s", "%s", %s, %s)' %
-            (name, description, inventory, price, picture))
-            return redirect('/adminportal')
+            picture = request.files.get('inputPicture')
+            cate = request.form['cate']
+            img_db_path = 'static/img/' + str(time.time()).replace('.', '') + '.' + picture.filename.split('.')[-1]
+            cursor.execute('insert into tbl_product(name, description, inventory, price, picture_url,category_id) value '
+                           '("%s", "%s", %s, %s, "%s", %s)' % (name,description, inventory, price, img_db_path, cate))
+            con.commit()
+            picture.save('%s/%s' % (basedir, img_db_path))
+            cursor.close()
+            con.close()
+            return redirect('/admin')
     except Exception as e:
+        cursor.close()
+        con.close()
         return render_template('error.html', error=str(e))
 
 @app.route('/editproduct', methods=['GET', 'POST'])
 def edit_item():
-    product_id = request.args.get('_id')
-    conn = mysql.connect()
-    cursor = conn.cursor()
-
-    if request.method == 'GET':
-        cursor.execute('select id,name,description,inventory,price,picture_url from tbl_product where id=%s',(product_id))
-        data = cursor.fetchall()
-        return render_template('editproduct.html', products=data)
-    else:
-        name = request.form['inputname']
-        description = request.form['inputDescription']
-        inventory = request.form['inputInventory']
-        price = request.form['inputPrice']
-        picture = request.form['inputPicture']
-        cursor.execute('update tbl_product set name=%s, description=%s, inventory=%s, price=%s, picture_url=%s where id=%s', (name, description,inventory, price, picture, product_id))
-       
-        data = cursor.fetchall()
-        conn.commit()
-        return redirect('/adminportal', products=data)
+    con = mysql.connect()
+    cursor = con.cursor()
+    p_id = request.args.get('_id')
+    try:
+        if request.method == 'GET':
+            cursor.execute("SELECT * FROM tbl_product where id= %s ", p_id)
+            product = cursor.fetchall()
+            if product:
+                return render_template('editproduct.html', product=product[0])
+            else:
+                return render_template('error.html', error='There is no such product!')
+        else:
+            name = request.form['inputname']
+            description = request.form['inputDescription']
+            inventory = request.form['inputInventory']
+            price = request.form['inputPrice']
+            picture = request.files.get('inputPicture', None)
+            cate = request.form['cate']
+            if picture:
+                img_db_path = 'static/img/' + str(time.time()).replace('.', '') + '.' + picture.filename.split('.')[-1]
+                cursor.execute('update tbl_product set name="%s", description="%s", inventory=%s, price=%s, picture_url="%s",category_id=%s where id=%s' % (name,description, inventory, price, img_db_path, cate, p_id))
+                con.commit()
+                picture.save('%s/%s' % (basedir, img_db_path))
+            else:
+                cursor.execute(
+                    'update tbl_product set name="%s", description="%s", inventory=%s, price=%s,category_id=%s where id=%s' % (
+                    name, description, inventory, price, cate, p_id))
+                con.commit()
+            cursor.close()
+            con.close()
+            return redirect('/admin')
+    except Exception as e:
+        cursor.close()
+        con.close()
+        return render_template('error.html', error=str(e))
 
 @app.route('/deleteprod')
 def delete_item():
     product_id = request.args.get('_id')
-    
+
     con = mysql.connect()
     cursor = con.cursor()
-    cursor.execute("delete * from tbl_product where id = %s", (product_id))
+    cursor.execute("delete from tbl_product where id = %s" % product_id)
 
-    cursor.execute("SELECT * FROM tbl_product")
-    data = cursor.fetchall()                   
-                    
     con.commit()
-    return render_template('adminportal.html', products=data)
+    return redirect('/admin')
+
 
 
 
