@@ -105,10 +105,7 @@ def validateLogin():
 
         if len(data) > 0:
             if str(data[0][2]) == _password:
-                if str(data[0][4]) == 1:
-                    return redirect('adminportal.html')
-                else:
-                    session['user_id'] = data[0][0]
+                session['user_id'] = data[0][0]
                 return redirect('/') #login success
             else:
                 return render_template('signin.html', error = 'Password incorrect, please try enter correct password')
@@ -292,56 +289,61 @@ def logout():
 
 @app.route('/addToCart',methods=['POST', 'GET'])
 def addToCart():
-    if session.get('user_id'):
-        _userid =session.get('user_id')
-        qty = 1
-        # qty = int(request.form['inputQty'])
-        product_id = int(request.args.get('_id'))
+    if not session.get('user_id'):
+        return redirect('/')
+    try:
+        qty = int(request.form['inputQty'])
+        product_id = request.form['productID']
 
-        all_total_price =0
-        all_tatal_quantity =0
+        if qty and product_id and request.method =='POST':
+            conn = mysql.connect()
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("SELECT * FROM tbl_product where id= %s ",(product_id)) 
+            row = cursor.fetchone()
 
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        
-        cursor.execute("SELECT * FROM tbl_product where id= %s ",(product_id))                                                                                                      
-        row = cursor.fetchall()
+            all_total_price = 0
+            all_tatal_quantity = 0 
 
-        itemArray = {row['id']:{'name': row['name'], 'quantity':qty, 'price':row['price'],'image':row['picture_url'],'total_price':qty*row['price']}}
+            itemArray = {row['id']:{'name': row['name'], 'quantity':qty, 'price':row['price'],'image':row['picture_url'],'total_price':qty*row['price']}}
  
         
         
-        session.modifed =True
-        if 'cart_item' in session:
-            if row['id'] in seesion ['cart_item']:
-                for key,value in session['cart_item'].items():
-                    if row[0] ==key:
-                        old_quantity = int(session['cart_item'][key]['quantity'])
-                        total_quantity = old_quantity + qty
-                        session['cart_item'][key]['quantity']=total_quantity
-                        session['cart_item'][key]['total_price']= total_quantity*row['price']
+            session.modifed =True
+            if 'cart_item' in session:
+                if row['id'] in seesion ['cart_item']:
+                    for key,value in session['cart_item'].items():
+                        if row['id'] == key:
+                            old_quantity = session['cart_item'][key]['quantity']
+                            total_quantity = old_quantity + qty
+                            session['cart_item'][key]['quantity']=total_quantity
+                            session['cart_item'][key]['total_price']= total_quantity*row['price']
+                    
+                else:
+                    session['cart_item'] = array_merge(session['car_item'],itemArray)
                 
+                for key, value in session['cart_item'].items():
+                    ind_quantity = int(session['cart_item'][key]['quantity'])
+                    ind_price = float(session['cart_item'][key]['price']) 
+                    all_total_quantity = all_total_quantity + ind_quantity
+                    all_total_price = all_total_price + ind_price
+            
+
             else:
-                session['cart_item'] = array_merge(session['car_item'],itemArray)
-            
-            for key, value in session['cart_item'].items():
-                ind_quantity = int(session['cart_item'][key]['quantity'])
-                ind_price = float(session['cart_item'][key]['price']) 
-                all_total_quantity = all_total_quantity + ind_quantity
-                all_total_price = all_total_price + ind_quantity
-            
+                session['cart_item'] = itemArray
+                all_tatal_quantity = all_tatal_quantity + qty
+                all_total_price = all_total_price + qty*row['price']
 
+            session['all_total_quantity'] = all_tatal_quantity
+            session['all_total_price'] = all_total_price
+            # flash('Item successfully added to cart!!','success')
+            return redirect('/')
         else:
-            session['cart_item'] = itemArray
-            all_tatal_quantity = all_tatal_quantity + qty
-            all_total_price = all_total_price + qty*row['price']
-
-        session['all_total_quantity'] = all_tatal_quantity
-        session['a''_total_price'] = all_total_price
-        # flash('Item successfully added to cart!!','success')
-        return redirect('/')
-    else:
-        return redirect('/showSignin')
+            return 'Error while adding item to cart'
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.route('/cart',methods=['POST', 'GET'])
 def cart():
@@ -349,15 +351,17 @@ def cart():
         _userid =session.get('user_id')
         conn = mysql.connect()
         cursor = conn.cursor()
-        cursor.execute("SELECT name FROM tbl_product where id= %s ",(_userid))                                                                                                      
-        _UserName = cursor.fetchall()
+        cursor.execute("SELECT name FROM tbl_user where id= %s ",(_userid))                                                                                                      
+        _username = cursor.fetchone()
 
 
-        if 'cart_item' in session:
-            return render_template('cart.html',UserName = _UserName)
-        else:
-            return render_template('home.html', message = 'Cart is empty, choose your Gourmet !!!')
-    else: return redirect('/showSignin')
+        # if 'cart_item' in session:
+        #     return render_template('cart.html',UserName = _UserName)
+        # else:
+        #     return render_template('home.html', message = 'Cart is empty, choose your Gourmet !!!')
+        return render_template('cart.html', username=_username)
+    else: 
+        return redirect('/showSignin')
 
 
 @app.route('/removeFromCart',methods=['POST', 'GET'])
@@ -389,17 +393,16 @@ def removeFromCart():
     except Exception as e:
         return render_template('error.html',error = str(e))
 
-@app.route('/emptyCart',methods=['POST', 'GET'])
+@app.route('/emptyCart')
 def emptyCart():
     try:
-        session['cart_items'].clear()
-        return redirect('/')
-    
+        session.pop('cart_item')   
+        return redirect('/cart')   
     except Exception as e:
         return render_template('error.html',error = str(e))
 
 def array_merge(first_array, second_array):
-    if isinstance( first_array,list) and isinstance(second_array, list):
+    if isinstance(first_array,list) and isinstance(second_array, list):
         return first_array + second_array
     elif isinstance(first_array, dict) and isinstance(second_array, dict):
         return dict( list(first_array.items())+ list(second_array.items()) )
@@ -407,51 +410,6 @@ def array_merge(first_array, second_array):
          return first_array.union (second_array)
     return False
 
-@app.route('/addproduct', methods=['GET', 'POST'])
-def add_product():
-    con = mysql.connect()
-    cursor = con.cursor()
-    try:
-        if request.method == 'GET':
-            return render_template('addproduct.html')
-        else:
-            name = request.form['inputname']
-            description = request.form['inputDescription']
-            inventory = request.form['inputInventory']
-            price = request.form['inputPrice']
-            picture = request.form['inputPicture']
-
-            execute_insert_sql(con, cursor,
-            'insert into tbl_product(name, description, inventory, price, picture_url ) value ("%s", "%s", "%s", %s, %s)' %
-            (name, description, inventory, price, picture))
-            return redirect('/adminportal')
-    except Exception as e:
-        return render_template('error.html', error=str(e))
-
-@app.route('/editproduct/<int:id>', methods=['GET', 'POST'])
-def edit_item(id):
-    con = mysql.connect()
-    cursor = con.cursor()
-    if request.method == 'GET':
-        production = execute_select_sql(cursor, 'select id,name,description,inventory,price,picture from tbl_product where id=%s' % id)
-        return render_template('editproduct.html', name=production[0][1], desc=todo[0][2], inven=todo[0][3], pric=todo[0][4], pict=todo[0][5], id=id)
-    else:
-        name = request.form['inputname']
-        description = request.form['inputDescription']
-        inventory = request.form['inputInventory']
-        price = request.form['inputPrice']
-        picture = request.form['inputPicture']
-        cursor.execute('update tbl_product set name=%s, description=%s, inventory=%s, price=%s, picture_url=%s where id=%s', [name, description,inventory, price, picture, id])
-        con.commit()
-        return redirect('/adminportal')
-
-@app.route('/deleteprod/<int:id>')
-def delete_item(id):
-    con = mysql.connect()
-    cursor = con.cursor()
-        cursor.execute("delete * from tbl_product where id = %s", [id])
-        con.commit()
-        return redirect('/adminportal')
 
 if __name__ == "__main__":
     app.run(debug=True)  
