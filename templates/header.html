@@ -46,8 +46,13 @@
                       <a class="nav-link" href="/showProfile">Profile</a>
                     </li>
                     <li class="nav-item">
+                      <a class="nav-link" href="/admin">admin</a>
+                    </li>
+
+                    <li class="nav-item">
                       <a class="nav-link" href="/logout">Logout</a>
                     </li>
+
                     <li class="nav-item">
                       <a class="nav-link" href="/cart">Cart(
                       {% if not 'cart_item' in session %}
@@ -58,8 +63,7 @@
                       )
                       </a>
                     </li>
-                        
-
+                   
                     {% else %}
 
                     <li class="nav-item">
@@ -99,10 +103,14 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/Category?_id=3">Rice Pastry</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/Category?_id=4">Snack</a>
-                </li>
                 
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="/Category?_id=4" id="navbarDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Snack</a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                      <li><a class="dropdown-item" href="#">Continents</a></li>
+                      <li><a class="dropdown-item" href="#">Countries</a></li>
+                    </ul>
+                </li>
             </ul> 
   
             <form class="form-inline my-2 my-lg-0 " action="/search" method="post">
